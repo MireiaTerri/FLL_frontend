@@ -12,7 +12,10 @@ export default function Navbar() {
 
     const navLinks = [
         { href: "/", label: "Home" },
-        { href: "/users", label: "Users", roles: ["ROLE_USER"] }
+        { href: "/users", label: "Users", roles: ["ROLE_USER"] },
+        { href: "/teams", label: "Teams", roles: ["ROLE_USER"] },
+        { href: "/editions", label: "Editions", roles: ["ROLE_USER"] },
+        { href: "/scientific-projects", label: "Scientific Projects", roles: ["ROLE_USER"] }
     ];
 
     return (

@@ -1,5 +1,17 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Available Routes
+
+- `/`: Home landing page with links to the core entities.
+- `/users`: Users module.
+- `/teams`: Teams module placeholder.
+- `/editions`: Editions module placeholder.
+- `/scientific-projects`: Scientific Projects module placeholder.
+
+Role visibility note:
+
+- `Users`, `Teams`, `Editions`, and `Scientific Projects` links in the navbar are visible only for users with `ROLE_USER`.
+
 ## Getting Started
 
 Install dependencies (only needed the first time, or when dependencies change):
