@@ -1,7 +1,16 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  /* config options here */
+// next.config.ts
+const nextConfig = {
+    async rewrites() {
+        return [
+            {
+                source: "/api/:path*",
+                destination: "https://api.firstlegoleague.win/:path*",
+            },
+        ];
+    },
 };
 
+export default nextConfig;
 export default nextConfig;

@@ -8,6 +8,7 @@ import { Label } from "@/app/components/label";
 import { clientAuthProvider } from "@/lib/authProvider";
 import { parseErrorMessage } from "@/types/errors";
 import { CheckCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
@@ -24,6 +25,7 @@ type FormValues = {
 
 export default function EditProfileForm({ userId, currentEmail }: EditProfileFormProps) {
     const service = new UsersService(clientAuthProvider);
+    const router = useRouter();
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -60,6 +62,7 @@ export default function EditProfileForm({ userId, currentEmail }: EditProfileFor
             await service.patchUser(userId, payload);
             setSuccessMessage("Profile updated successfully.");
             reset({ email: data.email, password: "", confirmPassword: "" });
+            router.refresh();
         } catch (e) {
             setErrorMessage(parseErrorMessage(e));
         }
