@@ -4,6 +4,8 @@ import { fetchHalCollection, fetchHalResource, createHalResource, patchHal, merg
 import { Resource } from "halfred";
 import { ApiError } from "@/types/errors";
 
+export type CreateUserPayload = Pick<User, "username" | "email" | "password">;
+
 export class UsersService {
     constructor(private readonly authStrategy: AuthStrategy) {
     }
@@ -24,12 +26,14 @@ export class UsersService {
         return fetchHalResource<User>('/identity', this.authStrategy);
     }
 
-    async createUser(user: User): Promise<User> {
-        return createHalResource<User>('/users', {
+    async createUser(user: CreateUserPayload): Promise<User> {
+        const payload = {
             id: user.username,
             email: user.email,
             password: user.password,
-        }, this.authStrategy, 'user');
+        } as unknown as Resource;
+
+        return createHalResource<User>('/users', payload, this.authStrategy, 'user');
     }
 
     async patchUser(id: string, data: Partial<Pick<User, 'email' | 'password'>>): Promise<User> {

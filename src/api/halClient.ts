@@ -9,7 +9,6 @@ import {
 } from "@/types/errors";
 
 const PROD_API_BASE_URL = "https://api.firstlegoleague.win";
-type JsonObject = Resource | globalThis.Record<string, unknown>;
 
 // Env variables starting with NEXT_PUBLIC_ are available to the client.
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || PROD_API_BASE_URL;
@@ -60,7 +59,7 @@ export async function fetchHalResource<T>(
  */
 export async function createHalResource<T>(
     path: string,
-    data: JsonObject,
+    data: Resource,
     authProvider: { getAuth: () => Promise<string | null> },
     resourceName: string
 ): Promise<T & Resource> {
@@ -84,7 +83,7 @@ export async function createHalResource<T>(
  */
 export async function updateHalResource<T>(
     path: string,
-    data: JsonObject,
+    data: Resource,
     authProvider: { getAuth: () => Promise<string | null> },
     resourceName: string
 ): Promise<T & Resource> {
@@ -205,7 +204,7 @@ async function executeHalRequest(config: {
     method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
     path: string;
     authProvider: { getAuth: () => Promise<string | null> };
-    body?: JsonObject;
+    body?: Resource;
 }): Promise<Resource | null> {
     const url = config.path.startsWith("http") ? config.path : `${API_BASE_URL}${config.path}`;
     const authorization = await config.authProvider.getAuth();
@@ -265,7 +264,7 @@ export async function getHal(path: string, authProvider: { getAuth: () => Promis
     }) as Resource;
 }
 
-export async function putHal(path: string, body: JsonObject, authProvider: { getAuth: () => Promise<string | null> }): Promise<Resource | null> {
+export async function putHal(path: string, body: Resource, authProvider: { getAuth: () => Promise<string | null> }): Promise<Resource | null> {
     return await executeHalRequest({ 
         method: 'PUT', 
         path, 
@@ -282,7 +281,7 @@ export async function deleteHal(path: string, authProvider: { getAuth: () => Pro
     });
 }
 
-export async function postHal(path: string, body: JsonObject, authProvider: { getAuth: () => Promise<string | null> }): Promise<Resource | null> {
+export async function postHal(path: string, body: Resource, authProvider: { getAuth: () => Promise<string | null> }): Promise<Resource | null> {
     return await executeHalRequest({ 
         method: 'POST', 
         path, 
@@ -291,7 +290,7 @@ export async function postHal(path: string, body: JsonObject, authProvider: { ge
     });
 }
 
-export async function patchHal(path: string, body: JsonObject, authProvider: { getAuth: () => Promise<string | null> }): Promise<Resource | null> {
+export async function patchHal(path: string, body: Resource, authProvider: { getAuth: () => Promise<string | null> }): Promise<Resource | null> {
     return await executeHalRequest({ 
         method: 'PATCH', 
         path, 

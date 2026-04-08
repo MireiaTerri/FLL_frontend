@@ -7,7 +7,6 @@ import { Button } from "@/app/components/button";
 import { Input } from "@/app/components/input";
 import { Label } from "@/app/components/label";
 import { clientAuthProvider } from "@/lib/authProvider";
-import { User } from "@/types/user";
 import { parseErrorMessage } from "@/types/errors";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -32,7 +31,7 @@ export default function RegistrationPage() {
 
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
         setErrorMessage(null);
-        return service.createUser(data as User)
+        return service.createUser(data)
             .then(() => {
                 router.push("/login");
             })

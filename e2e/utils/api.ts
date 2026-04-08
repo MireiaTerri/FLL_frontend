@@ -4,7 +4,8 @@ import { TestUser } from "./test-data";
 const DEFAULT_API_BASE_URL = "https://api.firstlegoleague.win";
 
 export function getApiBaseUrl() {
-    return process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE_URL;
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE_URL;
+    return baseUrl.replace(/\/+$/, "");
 }
 
 function getBasicAuthHeader(user: TestUser) {

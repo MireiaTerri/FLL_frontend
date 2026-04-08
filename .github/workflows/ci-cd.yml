@@ -30,6 +30,8 @@ jobs:
         run: npm run lint
 
       - name: Run E2E tests
+        env:
+          NEXT_PUBLIC_API_BASE_URL: https://api.firstlegoleague.win
         run: npx playwright test
 
       - name: Upload Playwright report

@@ -6,11 +6,12 @@ import { createRecordName, createTestUser } from "./utils/test-data";
 test("the user profile handles the records section correctly with the hosted backend", async ({ page, request }) => {
     const user = createTestUser("records");
     const supportsRecords = await hasRecordsApi(request);
+    const recordName = createRecordName();
 
     await createUserViaApi(request, user);
 
     if (supportsRecords) {
-        await createRecordViaApi(request, user, createRecordName());
+        await createRecordViaApi(request, user, recordName);
     }
 
     await loginViaUi(page, user);
@@ -20,7 +21,7 @@ test("the user profile handles the records section correctly with the hosted bac
     await expect(page.getByRole("heading", { name: "Records", exact: true, level: 2 })).toBeVisible();
 
     if (supportsRecords) {
-        await expect(page.locator('a[href^="/records/"]').first()).toBeVisible();
+        await expect(page.getByRole("link", { name: recordName, exact: true })).toBeVisible();
     } else {
         await expect(page.getByRole("alert").filter({ hasText: "Not Found" })).toBeVisible();
     }
