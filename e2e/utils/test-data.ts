@@ -4,10 +4,12 @@ export type TestUser = {
     password: string;
 };
 
-export const E2E_PASSWORD = "password123";
-
 function randomSuffix() {
     return `${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
+}
+
+function createPassword() {
+    return crypto.randomUUID();
 }
 
 export function createTestUser(prefix = "e2e-user"): TestUser {
@@ -16,7 +18,7 @@ export function createTestUser(prefix = "e2e-user"): TestUser {
     return {
         username,
         email: `${username}@example.com`,
-        password: E2E_PASSWORD,
+        password: createPassword(),
     };
 }
 

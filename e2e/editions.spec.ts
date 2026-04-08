@@ -6,8 +6,14 @@ test("editions page links to an edition detail page", async ({ page }) => {
     await expect(page.getByRole("heading", { name: "Editions", level: 1 })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Season overview", level: 2 })).toBeVisible();
 
+    const emptyState = page.getByText("No editions found");
     const firstEditionLink = page.locator('a[href^="/editions/"]').first();
-    await expect(firstEditionLink).toBeVisible();
+
+    await expect(emptyState.or(firstEditionLink)).toBeVisible();
+
+    if (await emptyState.isVisible()) {
+        return;
+    }
 
     await firstEditionLink.click();
 

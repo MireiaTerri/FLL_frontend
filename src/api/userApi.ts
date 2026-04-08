@@ -4,7 +4,11 @@ import { fetchHalCollection, fetchHalResource, createHalResource, patchHal, merg
 import { Resource } from "halfred";
 import { ApiError } from "@/types/errors";
 
-export type CreateUserPayload = Pick<User, "username" | "email" | "password">;
+export type CreateUserPayload = {
+    username: string;
+    email: string;
+    password: string;
+};
 
 export class UsersService {
     constructor(private readonly authStrategy: AuthStrategy) {
@@ -31,7 +35,7 @@ export class UsersService {
             id: user.username,
             email: user.email,
             password: user.password,
-        } as unknown as Resource;
+        };
 
         return createHalResource<User>('/users', payload, this.authStrategy, 'user');
     }

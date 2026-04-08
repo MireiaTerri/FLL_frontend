@@ -1,10 +1,13 @@
 import { APIRequestContext, expect } from "@playwright/test";
 import { TestUser } from "./test-data";
 
-const DEFAULT_API_BASE_URL = "https://api.firstlegoleague.win";
-
 export function getApiBaseUrl() {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE_URL;
+    const baseUrl = process.env.E2E_API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL;
+
+    if (!baseUrl) {
+        throw new Error("E2E_API_BASE_URL or NEXT_PUBLIC_API_BASE_URL must be set for Playwright API helpers.");
+    }
+
     return baseUrl.replace(/\/+$/, "");
 }
 
