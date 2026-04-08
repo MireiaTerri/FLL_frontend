@@ -3,6 +3,10 @@ import { createUserViaApi } from "./utils/api";
 import { loginViaUi } from "./utils/auth";
 import { createTestUser } from "./utils/test-data";
 
+function escapeForRegExp(value: string) {
+    return value.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+}
+
 test("an authenticated user can browse the users directory and open a profile", async ({ page, request }) => {
     const user = createTestUser("directory");
 
@@ -18,7 +22,7 @@ test("an authenticated user can browse the users directory and open a profile", 
 
     await userLink.click();
 
-    await expect(page).toHaveURL(new RegExp(`/users/${user.username.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`));
+    await expect(page).toHaveURL(new RegExp(String.raw`/users/${escapeForRegExp(user.username)}$`));
     await expect(page.getByRole("heading", { name: user.username, level: 1 })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Records", level: 2 })).toBeVisible();
 });
