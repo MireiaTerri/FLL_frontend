@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle, Trash2 } from "lucide-react";
 import { Button } from "@/app/components/button";
-import { User } from "@/types/user";
+import { UserEntity } from "@/types/user";
 import DeleteAdministratorDialog from "./delete-administrator-dialog";
 
 interface AdministratorListProps {
-  readonly administrators: User[];
+  readonly administrators: UserEntity[];
   readonly currentUsername: string;
 }
 
@@ -18,7 +18,7 @@ export default function AdministratorList({
   currentUsername,
 }: AdministratorListProps) {
   const router = useRouter();
-  const [adminToDelete, setAdminToDelete] = useState<User | null>(null);
+  const [adminToDelete, setAdminToDelete] = useState<UserEntity | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Auto-dismiss success message after 5 seconds

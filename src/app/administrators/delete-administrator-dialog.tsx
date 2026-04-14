@@ -5,11 +5,11 @@ import { Button } from "@/app/components/button";
 import ErrorAlert from "@/app/components/error-alert";
 import { UsersService } from "@/api/userApi";
 import { clientAuthProvider } from "@/lib/authProvider";
-import { User } from "@/types/user";
+import { UserEntity } from "@/types/user";
 import { parseErrorMessage } from "@/types/errors";
 
 interface DeleteAdministratorDialogProps {
-  readonly administrator: User;
+  readonly administrator: UserEntity;
   readonly onSuccess: () => void;
   readonly onCancel: () => void;
 }

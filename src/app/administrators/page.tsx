@@ -77,7 +77,11 @@ export default async function AdministratorsPage() {
 
                 {!error && administrators.length > 0 && currentUser && (
                     <AdministratorList
-                        administrators={administrators}
+                        administrators={administrators.map(({ username, email, authorities }) => ({
+                            username,
+                            email,
+                            authorities,
+                        }))}
                         currentUsername={currentUser.username}
                     />
                 )}
