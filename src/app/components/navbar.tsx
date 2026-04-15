@@ -13,8 +13,10 @@ export default function Navbar() {
         { href: "/", label: "Home" },
         { href: "/users", label: "Users", roles: ["ROLE_USER"] },
         { href: "/teams", label: "Teams" },
+        { href: "/editions", label: "Editions" },
+        { href: "/scientific-projects", label: "Scientific Projects" },
         { href: "/matches", label: "Matches" },
-        { href: "/scientific-projects", label: "Scientific Projects" }
+        { href: "/administrators", label: "Administrators", roles: ["ROLE_ADMIN"] }
     ];
 
     return (

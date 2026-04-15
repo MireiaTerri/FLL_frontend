@@ -3,31 +3,13 @@ import EmptyState from "@/app/components/empty-state";
 import ErrorAlert from "@/app/components/error-alert";
 import PageShell from "@/app/components/page-shell";
 import { serverAuthProvider } from "@/lib/authProvider";
+import { getEncodedResourceId } from "@/lib/halRoute";
+import { formatMatchTime } from "@/lib/matchUtils";
 import { parseErrorMessage } from "@/types/errors";
 import { Match } from "@/types/match";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
-
-function formatMatchTime(value?: string | null) {
-    if (!value) {
-        return "Not available";
-    }
-
-    const timeMatch = new RegExp(/^(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?$/).exec(value);
-    if (timeMatch) {
-        return `${timeMatch[1]}:${timeMatch[2]}`;
-    }
-
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-        return value;
-    }
-
-    return new Intl.DateTimeFormat("en-GB", {
-        hour: "2-digit",
-        minute: "2-digit",
-    }).format(date);
-}
 
 function getTeamsLabel(match: Match) {
     return `${match.teamA} vs ${match.teamB}`;
@@ -63,22 +45,34 @@ function MatchesTable({ matches }: Readonly<{ matches: Match[] }>) {
                         </tr>
                     </thead>
                     <tbody>
-                        {matches.map((match, index) => (
-                            <tr
-                                key={getMatchKey(match, index)}
-                                className="border-t border-border transition-colors hover:bg-secondary/40"
-                            >
-                                <td className="px-4 py-4 text-sm text-foreground sm:px-5">
-                                    {formatMatchTime(match.startTime)}
-                                </td>
-                                <td className="px-4 py-4 text-sm text-foreground sm:px-5">
-                                    {formatMatchTime(match.endTime)}
-                                </td>
-                                <td className="px-4 py-4 text-sm text-muted-foreground sm:px-5">
-                                    {getTeamsLabel(match)}
-                                </td>
-                            </tr>
-                        ))}
+                        {matches.map((match, index) => {
+                            const matchId = getEncodedResourceId(match.link("self")?.href ?? match.uri);
+                            return (
+                                <tr
+                                    key={getMatchKey(match, index)}
+                                    className="border-t border-border transition-colors hover:bg-secondary/40"
+                                >
+                                    <td className="px-4 py-4 text-sm text-foreground sm:px-5">
+                                        {formatMatchTime(match.startTime)}
+                                    </td>
+                                    <td className="px-4 py-4 text-sm text-foreground sm:px-5">
+                                        {formatMatchTime(match.endTime)}
+                                    </td>
+                                    <td className="px-4 py-4 text-sm text-muted-foreground sm:px-5">
+                                        {matchId ? (
+                                            <Link
+                                                href={`/matches/${matchId}`}
+                                                className="hover:text-foreground hover:underline underline-offset-2"
+                                            >
+                                                {getTeamsLabel(match)}
+                                            </Link>
+                                        ) : (
+                                            getTeamsLabel(match)
+                                        )}
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>
@@ -132,7 +126,7 @@ export default async function MatchesPage() {
                 <div className="space-y-3">
                     <div className="page-eyebrow">Live listing</div>
                     <h2 className="section-title">Match schedule</h2>
-                    
+
                 </div>
 
                 {error && <ErrorAlert message={error} />}
