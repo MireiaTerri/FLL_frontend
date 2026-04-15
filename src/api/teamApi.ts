@@ -8,8 +8,10 @@ import {
     deleteHal
 } from "./halClient";
 
+
 function getSafeEncodedId(id: string): string {
     try {
+        // HAL links may already contain encoded ids, so normalize before reusing them.
         return encodeURIComponent(decodeURIComponent(id));
     } catch {
         return encodeURIComponent(id);
@@ -66,5 +68,10 @@ export class TeamsService {
 
     async removeTeamMember(memberUri: string): Promise<void> {
         await deleteHal(memberUri, this.authStrategy);
+    }
+}
+    async deleteTeam(id: string): Promise<void> {
+        const teamId = getSafeEncodedId(id);
+        await deleteHal(`/teams/${teamId}`, this.authStrategy);
     }
 }
