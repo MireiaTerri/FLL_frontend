@@ -12,10 +12,35 @@ interface TeamDetailPageProps {
     readonly params: Promise<{ id: string }>;
 }
 
-function extractTeamMembers(data: unknown): unknown[] {
-    const rawMembers = Array.isArray(data) ? data : (data?._embedded?.teamMembers ?? []);
+interface RawMember {
+    id?: string | number;
+    name?: string;
+    username?: string;
+    role?: string;
+    uri?: string;
+    _links?: {
+        self: { href: string };
+    };
+}
 
-    return rawMembers.map((m: unknown, index: number) => {
+interface HalMemberResponse {
+    _embedded?: {
+        teamMembers: RawMember[];
+    };
+}
+
+function extractTeamMembers(data: unknown): User[] {
+    const isHalResponse = (obj: unknown): obj is HalMemberResponse => {
+        return !!obj && typeof obj === 'object' && '_embedded' in obj;
+    };
+
+    const rawMembers: RawMember[] = Array.isArray(data) 
+        ? data as RawMember[] 
+        : isHalResponse(data) 
+            ? data._embedded?.teamMembers ?? [] 
+            : [];
+
+    return rawMembers.map((m, index) => {
         const extractedId = m._links?.self?.href?.split('/').pop() || m.uri?.split('/').pop();
 
         return {
@@ -23,7 +48,7 @@ function extractTeamMembers(data: unknown): unknown[] {
             name: String(m.name ?? m.username ?? "Unnamed member"),
             role: String(m.role ?? "Member"),
             uri: String(m._links?.self?.href || m.uri || "")
-        };
+        } as unknown as User;
     });
 }
 
@@ -36,7 +61,7 @@ export default async function TeamDetailPage(props: Readonly<TeamDetailPageProps
     let currentUser: User | null = null;
     let team: Team | null = null;
     let coaches: User[] = [];
-    let members: unknown[] = [];
+    let members: User[] = [];
     let error: string | null = null;
     let membersError: string | null = null;
 
