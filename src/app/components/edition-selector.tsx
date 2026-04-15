@@ -53,7 +53,7 @@ export default function EditionSelector() {
             <select
                 disabled
                 className="border-input h-10 border bg-card px-3 py-2 text-sm opacity-70"
-                aria-label="Select edition"
+                aria-label="Edition"
             >
                 <option>{error ? "Editions unavailable" : "No editions available"}</option>
             </select>
@@ -65,7 +65,7 @@ export default function EditionSelector() {
             value={currentYear ?? ""}
             onChange={handleChange}
             className="border-input h-10 border bg-card px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-ring/35 focus-visible:ring-[3px]"
-            aria-label="Select edition"
+            aria-label="Edition"
         >
             <option value="">All editions</option>
             {editions.map((edition) => (
