@@ -47,9 +47,9 @@ export class TeamsService {
         );
     }
 
-    async addTeamMember(teamId: string, data: AddMemberPayload): Promise<unknown> {
+    async addTeamMember(teamId: string, data: AddMemberPayload): Promise<User> {
         const safeId = getSafeEncodedId(teamId);
-        return createHalResource<unknown>(
+        return createHalResource<User>(
             "/teamMembers",
             {
                 name: data.name.trim(),
@@ -60,9 +60,10 @@ export class TeamsService {
                 team: `/teams/${safeId}`
             },
             this.authStrategy,
-            "team member"
+            "teamMembers"
         );
     }
+
 
 
     async deleteTeam(id: string): Promise<void> {
