@@ -1,12 +1,12 @@
 import { VolunteersService } from "@/api/volunteerApi";
-import PageShell from "@/app/components/page-shell";
-import ErrorAlert from "@/app/components/error-alert";
 import EmptyState from "@/app/components/empty-state";
+import ErrorAlert from "@/app/components/error-alert";
+import PageShell from "@/app/components/page-shell";
 import { serverAuthProvider } from "@/lib/authProvider";
-import { Volunteer } from "@/types/volunteer";
 import { parseErrorMessage } from "@/types/errors";
+import { Volunteer } from "@/types/volunteer";
 
-function VolunteerList({ title, typePlural, volunteers, emptyMessage }: { title: string, typePlural: string, volunteers: Volunteer[], emptyMessage: string }) {
+function VolunteerList({ title, typePlural, volunteers, emptyMessage }: Readonly<{ title: string, typePlural: string, volunteers: Volunteer[], emptyMessage: string }>) {
     return (
         <div className="space-y-4 pt-4">
             <h3 className="text-xl font-semibold tracking-tight">{title}</h3>
