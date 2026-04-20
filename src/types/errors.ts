@@ -114,7 +114,7 @@ export class ConflictError extends ApiError {
  */
 export function parseErrorMessage(error: unknown): string {
   if (error instanceof ApiError) {
-    let msg = error.message;
+    const msg = error.message;
 
     // Sanitize raw database exception strings
     if (msg.includes("duplicate key value violates unique constraint") || msg.includes("ConstraintViolationException")) {
