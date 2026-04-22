@@ -154,8 +154,21 @@ export default async function MatchDetailPage(props: Readonly<MatchDetailPagePro
         ]);
     }
 
-    const teamA = teams.find((t) => t.name === match?.teamA) ?? teams[0] ?? null;
-    const teamB = teams.find((t) => t.name === match?.teamB) ?? teams[1] ?? null;
+    const resolveTeam = (rel: "teamA" | "teamB", fallbackName: string | undefined, fallbackIndex: number) => {
+        if (!match) return teams[fallbackIndex] ?? null;
+
+        const halLink = match.link(rel)?.href;
+        if (halLink) {
+            const linkedTeam = teams.find((t) => (t.link("self")?.href ?? t.uri) === halLink);
+            if (linkedTeam) return linkedTeam;
+        }
+
+        console.warn(`[MatchDetail] HAL link for ${rel} absent. Falling back to name comparison for "${fallbackName}".`);
+        return teams.find((t) => t.name === fallbackName) ?? teams[fallbackIndex] ?? null;
+    };
+
+    const teamA = resolveTeam("teamA", match?.teamA, 0);
+    const teamB = resolveTeam("teamB", match?.teamB, 1);
     const numericMatchId = Number.parseInt(decodeURIComponent(id), 10) || null;
     const displayTeamA = teamA ?? formTeamA;
     const displayTeamB = teamB ?? formTeamB;
