@@ -41,14 +41,14 @@ export default function TeamEditSection({ team }: TeamEditSectionProps) {
 
             const payload = {
                 id: team.id,
-                name: formData.get('name')?.toString().trim() || '',
-                city: formData.get('city')?.toString().trim() || null,
-                educationalCenter: formData.get('educationalCenter')?.toString().trim() || null,
-                category: formData.get('category')?.toString() || '',
+                name: String(formData.get('name') || ''),
+                city: formData.get('city') || null,
+                educationalCenter: formData.get('educationalCenter') || null,
+                category: String(formData.get('category') || ''),
                 foundationYear: formData.get('foundationYear')
                     ? Number(formData.get('foundationYear'))
                     : null,
-                inscriptionDate: formData.get('inscriptionDate')?.toString() || null,
+                inscriptionDate: formData.get('inscriptionDate') || null,
             };
 
             const result = await updateTeam(payload);
