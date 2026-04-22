@@ -4,7 +4,7 @@ import ErrorAlert from '@/app/components/error-alert';
 import PageShell from '@/app/components/page-shell';
 import { serverAuthProvider } from '@/lib/authProvider';
 import { isAdmin } from '@/lib/authz';
-import { fetchEditionFormData } from '@/app/scientific-projects/_fetch-edition-data';
+import { fetchEditionFormData, EditionFormData } from '@/app/scientific-projects/_fetch-edition-data';
 import { AuthenticationError, NotFoundError, parseErrorMessage } from '@/types/errors';
 import { redirect } from 'next/navigation';
 import EditScientificProjectForm from './form';
@@ -42,7 +42,14 @@ export default async function EditScientificProjectPage(props: Readonly<EditScie
         }
     }
 
-    const { editionOptions, teamsPerEdition } = await fetchEditionFormData(serverAuthProvider);
+    let editionData: EditionFormData | null = null;
+    if (project && !error) {
+        try {
+            editionData = await fetchEditionFormData(serverAuthProvider);
+        } catch (e) {
+            error = parseErrorMessage(e);
+        }
+    }
 
     const teamHref = project?.link('team')?.href ?? project?.team ?? '';
     const editionHref = project?.link('edition')?.href ?? project?.edition ?? '';
@@ -56,12 +63,12 @@ export default async function EditScientificProjectPage(props: Readonly<EditScie
             description="Update the project's information."
         >
             {error && <ErrorAlert message={error} />}
-            {project && !error && (
+            {project && !error && editionData && (
                 <EditScientificProjectForm
                     projectId={id}
                     defaultValues={{ name, description, edition: editionHref, team: teamHref }}
-                    editionOptions={editionOptions}
-                    teamsPerEdition={teamsPerEdition}
+                    editionOptions={editionData.editionOptions}
+                    teamsPerEdition={editionData.teamsPerEdition}
                 />
             )}
         </PageShell>

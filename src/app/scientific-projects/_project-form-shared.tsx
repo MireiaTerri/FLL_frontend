@@ -49,16 +49,24 @@ interface OptionSelectProps {
 }
 
 export function OptionSelect({ id, label, options, registration, error, disabled, placeholder }: Readonly<OptionSelectProps>) {
+    const errorId = `${id}-error`;
     return (
         <div className="grid gap-2">
             <Label htmlFor={id}>{label}</Label>
-            <select id={id} className={selectClassName} disabled={disabled} {...registration}>
+            <select
+                id={id}
+                className={selectClassName}
+                disabled={disabled}
+                aria-invalid={!!error}
+                aria-describedby={error ? errorId : undefined}
+                {...registration}
+            >
                 <option value="">{placeholder ?? 'Select...'}</option>
                 {options.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
             </select>
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && <p id={errorId} className="text-sm text-destructive">{error}</p>}
         </div>
     );
 }
@@ -124,24 +132,28 @@ export function ScientificProjectForm({
                 <Label htmlFor="name">Project name</Label>
                 <Input
                     id="name"
+                    aria-invalid={!!errors.name}
+                    aria-describedby={errors.name ? 'name-error' : undefined}
                     {...register('name', {
                         required: 'Project name is required',
                         maxLength: { value: 100, message: 'Max 100 characters' },
                     })}
                 />
-                {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+                {errors.name && <p id="name-error" className="text-sm text-destructive">{errors.name.message}</p>}
             </div>
 
             <div className="grid gap-2">
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                     id="description"
+                    aria-invalid={!!errors.description}
+                    aria-describedby={errors.description ? 'description-error' : undefined}
                     {...register('description', {
                         required: 'Description is required',
                         maxLength: { value: 400, message: 'Max 400 characters' },
                     })}
                 />
-                {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
+                {errors.description && <p id="description-error" className="text-sm text-destructive">{errors.description.message}</p>}
             </div>
 
             <OptionSelect

@@ -9,7 +9,8 @@ export interface EditionFormData {
 }
 
 export async function fetchEditionFormData(authProvider: AuthStrategy): Promise<EditionFormData> {
-    const editions = await new EditionsService(authProvider).getEditions().catch(() => []);
+    const editionsService = new EditionsService(authProvider);
+    const editions = await editionsService.getEditions();
 
     const editionOptions: Option[] = editions.map(e => {
         const venuePart = e.venueName ? ` — ${e.venueName}` : '';
@@ -19,10 +20,9 @@ export async function fetchEditionFormData(authProvider: AuthStrategy): Promise<
     const teamsPerEditionEntries = await Promise.all(
         editions.map(async (e) => {
             const editionHref = e.link('self')?.href ?? '';
-            const editionId = getEncodedResourceId(editionHref) ?? '';
-            const teams = await new EditionsService(authProvider)
-                .getEditionTeams(editionId)
-                .catch(() => []);
+            const encodedEditionId = getEncodedResourceId(editionHref);
+            const editionId = encodedEditionId ? decodeURIComponent(encodedEditionId) : '';
+            const teams = await editionsService.getEditionTeams(editionId);
             return [editionHref, teams.map(t => ({
                 label: t.id ?? t.name ?? '',
                 value: t.link('self')?.href ?? '',
