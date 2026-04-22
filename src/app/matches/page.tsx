@@ -1,6 +1,5 @@
 import { EditionsService } from "@/api/editionApi";
 import { MatchesService } from "@/api/matchesApi";
-import { TeamsService } from "@/api/teamApi";
 import { UsersService } from "@/api/userApi";
 import { buttonVariants } from "@/app/components/button";
 import EmptyState from "@/app/components/empty-state";
@@ -14,7 +13,6 @@ import { formatMatchTime } from "@/lib/matchUtils";
 import { parseErrorMessage } from "@/types/errors";
 import type { HalPage } from "@/types/pagination";
 import { Match } from "@/types/match";
-import { Team } from "@/types/team";
 import { User } from "@/types/user";
 import Link from "next/link";
 
@@ -22,21 +20,9 @@ export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 5;
 
-function getTeamName(match: Match, rel: "teamA" | "teamB", teams: Team[]) {
-    const halLink = match.link(rel)?.href;
-    if (halLink) {
-        const team = teams.find((t) => (t.link("self")?.href ?? t.uri) === halLink);
-        if (team?.name) return team.name;
-    }
-    // Fallback to the old attribute if for some reason it's still sent
-    const attr = rel === "teamA" ? match.teamA : match.teamB;
-    return attr ?? "Unknown Team";
-}
-
-function getTeamsLabel(match: Match, teams: Team[]) {
-    const nameA = getTeamName(match, "teamA", teams);
-    const nameB = getTeamName(match, "teamB", teams);
-    return `${nameA} vs ${nameB}`;
+function getTeamsLabel(match: Match, labels: Record<string, string>) {
+    const key = match.link("self")?.href ?? match.uri;
+    return labels[key] ?? "Unknown Team vs Unknown Team";
 }
 
 function getMatchKey(match: Match, index: number) {
@@ -55,7 +41,7 @@ function compareMatchTimes(left: string = "", right: string = "") {
     return left.localeCompare(right);
 }
 
-function MatchesTable({ matches, teams, yearQuery }: Readonly<{ matches: Match[]; teams: Team[]; yearQuery: string }>) {
+function MatchesTable({ matches, labels, yearQuery }: Readonly<{ matches: Match[]; labels: Record<string, string>; yearQuery: string }>) {
     return (
         <div className="overflow-hidden border border-border">
             <div className="overflow-x-auto">
@@ -88,10 +74,10 @@ function MatchesTable({ matches, teams, yearQuery }: Readonly<{ matches: Match[]
                                                 href={`/matches/${matchId}${yearQuery}`}
                                                 className="hover:text-foreground hover:underline underline-offset-2"
                                             >
-                                                {getTeamsLabel(match, teams)}
+                                                {getTeamsLabel(match, labels)}
                                             </Link>
                                         ) : (
-                                            getTeamsLabel(match, teams)
+                                            getTeamsLabel(match, labels)
                                         )}
                                     </td>
                                 </tr>
@@ -124,7 +110,7 @@ export default async function MatchesPage({ searchParams }: Readonly<{ searchPar
     const urlPage = Math.max(1, Number(params.page ?? "1") || 1);
 
     let matches: Match[] = [];
-    let teams: Team[] = [];
+    let matchLabels: Record<string, string> = {};
     let result: HalPage<Match> = { items: [], hasNext: false, hasPrev: false, currentPage: 0 };
     let error: string | null = null;
     let currentUser: User | null = null;
@@ -137,8 +123,6 @@ export default async function MatchesPage({ searchParams }: Readonly<{ searchPar
 
     try {
         const service = new MatchesService(serverAuthProvider);
-        const teamsService = new TeamsService(serverAuthProvider);
-        teams = await teamsService.getTeams().catch(() => []);
 
         if (year) {
             const editionsService = new EditionsService(serverAuthProvider);
@@ -158,6 +142,45 @@ export default async function MatchesPage({ searchParams }: Readonly<{ searchPar
             result = await service.getMatchesPaged(urlPage - 1, PAGE_SIZE);
             matches = result.items;
         }
+
+        const resolvedLabels = await Promise.all(matches.map(async (match) => {
+            const selfLink = match.link("self")?.href ?? match.uri;
+            const matchId = getEncodedResourceId(selfLink);
+            
+            if (!matchId) return { key: selfLink, label: "Unknown Team vs Unknown Team" };
+
+            let nameA = match.teamA;
+            let nameB = match.teamB;
+
+            try {
+                if (!nameA && match.link("teamA")) {
+                    const tA = await service.getMatchTeamA(decodeURIComponent(matchId));
+                    nameA = tA?.name ?? tA?.id ?? "Team A";
+                }
+            } catch (_e) {
+                nameA = "Team A";
+            }
+
+            try {
+                if (!nameB && match.link("teamB")) {
+                    const tB = await service.getMatchTeamB(decodeURIComponent(matchId));
+                    nameB = tB?.name ?? tB?.id ?? "Team B";
+                }
+            } catch (_e) {
+                nameB = "Team B";
+            }
+
+            return {
+                key: selfLink,
+                label: `${nameA ?? "Team A"} vs ${nameB ?? "Team B"}`
+            };
+        }));
+
+        matchLabels = resolvedLabels.reduce((acc, { key, label }) => {
+            acc[key] = label;
+            return acc;
+        }, {} as Record<string, string>);
+
     } catch (fetchError) {
         console.error("Failed to fetch matches:", fetchError);
         error = getFriendlyMatchesError(fetchError);
@@ -194,7 +217,7 @@ export default async function MatchesPage({ searchParams }: Readonly<{ searchPar
 
                 {!error && matches.length > 0 && (
                     <div className="space-y-4">
-                        <MatchesTable matches={matches} teams={teams} yearQuery={yearQuery} />
+                        <MatchesTable matches={matches} labels={matchLabels} yearQuery={yearQuery} />
                         {!year && (
                             <PaginationControls
                                 currentPage={urlPage}
