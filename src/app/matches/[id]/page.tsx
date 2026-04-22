@@ -102,6 +102,7 @@ export default async function MatchDetailPage(props: Readonly<MatchDetailPagePro
     let teams: Team[] = [];
     let currentUser: User | null = null;
     let matchError: string | null = null;
+    let teamsError: string | null = null;
     let isAuthorized = false;
     let formTeamA: Team | null = null;
     let formTeamB: Team | null = null;
@@ -115,7 +116,7 @@ export default async function MatchDetailPage(props: Readonly<MatchDetailPagePro
         currentUser = await new UsersService(serverAuthProvider).getCurrentUser();
         isAuthorized = isAdmin(currentUser) || isReferee(currentUser);
     } catch (e) {
-        console.error("[MatchDetail] getCurrentUser failed:", e);
+        console.error("getCurrentUser failed:", e);
     }
 
     try {
@@ -135,7 +136,8 @@ export default async function MatchDetailPage(props: Readonly<MatchDetailPagePro
 
         await Promise.all([
             teamsService.getTeams().then((t) => { teams = t; }).catch((e) => {
-                console.warn("[MatchDetail] Failed to fetch all teams:", e.message);
+                console.warn("Failed to fetch all teams:", e.message);
+                teamsError = `Could not load team information. ${parseErrorMessage(e)}`;
             }),
             service.getMatchTeamA(id).then((t) => {
                 formTeamA = t;
@@ -167,9 +169,9 @@ export default async function MatchDetailPage(props: Readonly<MatchDetailPagePro
         }
 
         if (halLink) {
-            console.warn(`[MatchDetail] HAL link for ${rel} present (${halLink}) but team not found in collection. Falling back to name comparison for "${fallbackName}".`);
+            console.warn(`HAL link for ${rel} present (${halLink}) but team not found in collection. Falling back to name comparison for "${fallbackName}".`);
         } else {
-            console.warn(`[MatchDetail] HAL link for ${rel} absent. Falling back to name comparison for "${fallbackName}".`);
+            console.warn(`HAL link for ${rel} absent. Falling back to name comparison for "${fallbackName}".`);
         }
         
         return teams.find((t) => t.name === fallbackName) ?? teams[fallbackIndex] ?? null;
@@ -229,7 +231,9 @@ export default async function MatchDetailPage(props: Readonly<MatchDetailPagePro
                                 Teams
                             </h2>
                         </div>
-
+                        
+                        {teamsError && <ErrorAlert message={teamsError} />}
+                        
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             {displayTeamA ? (
                                 <TeamCard team={displayTeamA} label="Team A" yearQuery={yearQuery} />
