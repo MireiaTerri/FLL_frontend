@@ -1,6 +1,7 @@
-import { API_BASE_URL } from "@/api/halClient";
 import { EditionsService } from "@/api/editionApi";
+import { API_BASE_URL } from "@/api/halClient";
 import { MatchesService } from "@/api/matchesApi";
+import { TeamsService } from "@/api/teamApi";
 import { UsersService } from "@/api/userApi";
 import ErrorAlert from "@/app/components/error-alert";
 import PageShell from "@/app/components/page-shell";
@@ -180,6 +181,8 @@ export default async function MatchDetailPage(props: Readonly<MatchDetailPagePro
 
     if (match && !matchError) {
         const matchUri = `${API_BASE_URL}/matches/${decodeURIComponent(id)}`;
+
+        const teamsService = new TeamsService(serverAuthProvider);
         const editionsService = new EditionsService(serverAuthProvider);
         const roundDetailsPromise = service.getMatchRound(id).then((resolvedRound) => {
             const editionUri =
@@ -203,7 +206,7 @@ export default async function MatchDetailPage(props: Readonly<MatchDetailPagePro
         });
 
         const [, roundDetails] = await Promise.all([
-            service.getMatchTeams(id).then((t) => {
+            teamsService.getTeams().then((t) => {
                 teams = t;
             }).catch((e) => {
                 console.error("Failed to fetch match teams:", e);
@@ -233,8 +236,28 @@ export default async function MatchDetailPage(props: Readonly<MatchDetailPagePro
         edition = roundDetails.edition;
     }
 
-    const teamA = teams.find((t) => t.name === match?.teamA) ?? teams[0] ?? null;
-    const teamB = teams.find((t) => t.name === match?.teamB) ?? teams[1] ?? null;
+    const resolveTeam = (rel: "teamA" | "teamB", fallbackName: string | undefined) => {
+        if (!match) return null;
+
+        const halLink = match.link(rel)?.href;
+        const targetId = getEncodedResourceId(halLink);
+        
+        if (targetId) {
+            const linkedTeam = teams.find((t) => getEncodedResourceId(t.link("self")?.href ?? t.uri) === targetId);
+            if (linkedTeam) return linkedTeam;
+        }
+
+        if (halLink) {
+            console.warn(`HAL link for ${rel} present (${halLink}) but team not found in collection. Falling back to name comparison for "${fallbackName}".`);
+        } else {
+            console.warn(`HAL link for ${rel} absent. Falling back to name comparison for "${fallbackName}".`);
+        }
+        
+        return teams.find((t) => t.name === fallbackName) ?? null;
+    };
+
+    const teamA = resolveTeam("teamA", match?.teamA);
+    const teamB = resolveTeam("teamB", match?.teamB);
     const roundFallback = (match as (Match & { round?: string }) | null)?.round;
     const numericMatchId = Number.parseInt(decodeURIComponent(id), 10) || null;
     const displayTeamA = teamA ?? formTeamA;
@@ -290,7 +313,7 @@ export default async function MatchDetailPage(props: Readonly<MatchDetailPagePro
                                 Teams
                             </h2>
                         </div>
-
+                        
                         {teamsError && <ErrorAlert message={teamsError} />}
 
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
