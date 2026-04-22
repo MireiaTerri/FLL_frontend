@@ -116,7 +116,7 @@ export default async function MatchDetailPage(props: Readonly<MatchDetailPagePro
         currentUser = await new UsersService(serverAuthProvider).getCurrentUser();
         isAuthorized = isAdmin(currentUser) || isReferee(currentUser);
     } catch (e) {
-        console.error("getCurrentUser failed:", e);
+        console.error("[MatchDetail] getCurrentUser failed:", e);
     }
 
     try {
@@ -136,7 +136,7 @@ export default async function MatchDetailPage(props: Readonly<MatchDetailPagePro
 
         await Promise.all([
             teamsService.getTeams().then((t) => { teams = t; }).catch((e) => {
-                console.warn("Failed to fetch all teams:", e.message);
+                console.error("Failed to fetch match teams:", e);
                 teamsError = `Could not load team information. ${parseErrorMessage(e)}`;
             }),
             service.getMatchTeamA(id).then((t) => {
@@ -233,7 +233,7 @@ export default async function MatchDetailPage(props: Readonly<MatchDetailPagePro
                         </div>
                         
                         {teamsError && <ErrorAlert message={teamsError} />}
-                        
+
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             {displayTeamA ? (
                                 <TeamCard team={displayTeamA} label="Team A" yearQuery={yearQuery} />
