@@ -154,6 +154,8 @@ export default async function MatchDetailPage(props: Readonly<MatchDetailPagePro
     const teamA = teams.find((t) => t.name === match?.teamA) ?? teams[0] ?? null;
     const teamB = teams.find((t) => t.name === match?.teamB) ?? teams[1] ?? null;
     const numericMatchId = Number.parseInt(decodeURIComponent(id), 10) || null;
+    const displayTeamA = teamA ?? formTeamA;
+    const displayTeamB = teamB ?? formTeamB;
 
     const displayState = matchResults.length > 0 ? "COMPLETED" : match?.state;
 
@@ -201,13 +203,13 @@ export default async function MatchDetailPage(props: Readonly<MatchDetailPagePro
                         {teamsError && <ErrorAlert message={teamsError} />}
 
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            {(teamA ?? formTeamA) ? (
-                                <TeamCard team={(teamA ?? formTeamA) as Team} label="Team A" yearQuery={yearQuery} />
+                            {displayTeamA ? (
+                                <TeamCard team={displayTeamA} label="Team A" yearQuery={yearQuery} />
                             ) : (
                                 <UnknownTeamCard label="Team A" name={match.teamA} />
                             )}
-                            {(teamB ?? formTeamB) ? (
-                                <TeamCard team={(teamB ?? formTeamB) as Team} label="Team B" yearQuery={yearQuery} />
+                            {displayTeamB ? (
+                                <TeamCard team={displayTeamB} label="Team B" yearQuery={yearQuery} />
                             ) : (
                                 <UnknownTeamCard label="Team B" name={match.teamB} />
                             )}
@@ -259,7 +261,7 @@ export default async function MatchDetailPage(props: Readonly<MatchDetailPagePro
                                 </button>
                             ) : (
                                 <RecordResultForm
-                                    matchId={numericMatchId!}
+                                    matchId={numericMatchId}
                                     teamAId={teamAId}
                                     teamBId={teamBId}
                                     teamAName={teamADisplayName}
