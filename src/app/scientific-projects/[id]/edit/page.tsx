@@ -11,6 +11,17 @@ import EditScientificProjectForm from './form';
 
 export const dynamic = 'force-dynamic';
 
+async function assertAdminUser(id: string): Promise<void> {
+    try {
+        const user = await new UsersService(serverAuthProvider).getCurrentUser();
+        if (!user) redirect('/login');
+        if (!isAdmin(user)) redirect(`/scientific-projects/${id}`);
+    } catch (e) {
+        if (e instanceof AuthenticationError) redirect('/login');
+        throw e;
+    }
+}
+
 interface EditScientificProjectPageProps {
     readonly params: Promise<{ id: string }>;
 }
@@ -20,16 +31,11 @@ export default async function EditScientificProjectPage(props: Readonly<EditScie
 
     let error: string | null = null;
 
-    let currentUser = null;
     try {
-        currentUser = await new UsersService(serverAuthProvider).getCurrentUser();
+        await assertAdminUser(id);
     } catch (e) {
-        if (e instanceof AuthenticationError) redirect('/login');
         error = parseErrorMessage(e);
     }
-
-    if (!currentUser && !error) redirect('/login');
-    if (currentUser && !isAdmin(currentUser)) redirect(`/scientific-projects/${id}`);
 
     let project = null;
     if (!error) {
