@@ -1,7 +1,7 @@
 import type { AuthStrategy } from "@/lib/authProvider";
-import type { HalPage } from "@/types/pagination";
 import { CompetitionTable } from "@/types/competitionTable";
 import { Match } from "@/types/match";
+import type { HalPage } from "@/types/pagination";
 import { Referee } from "@/types/referee";
 import { Round } from "@/types/round";
 import { Team } from "@/types/team";
