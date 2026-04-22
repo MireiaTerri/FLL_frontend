@@ -59,7 +59,13 @@ function normalizeUri(resourceUri: string | null | undefined): string | null {
         return null;
     }
 
-    return resourceUri.split(/[?#]/, 1)[0] ?? null;
+    const sanitizedUri = resourceUri.split(/[?#]/, 1)[0] ?? null;
+
+    if (!sanitizedUri) {
+        return null;
+    }
+
+    return sanitizedUri.replace(/^https?:\/\/[^/]+/i, "");
 }
 
 function getAwardsByTeamUri(awards: Award[]): Map<string, Award[]> {
