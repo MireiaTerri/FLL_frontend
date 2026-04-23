@@ -121,6 +121,10 @@ export default async function TeamDetailPage(props: Readonly<TeamDetailPageProps
                 <div className="w-full rounded-lg border border-border bg-card p-6 shadow-sm">
                     <h1 className="mb-2 text-2xl font-semibold text-foreground">
                         {team.name}
+                <div className="w-full rounded-lg border bg-white p-6 shadow-sm dark:bg-black">
+
+                    <h1 className="mb-2 text-2xl font-semibold">
+                        {teamDisplayName ?? "Unnamed team"}
                     </h1>
 
                     <div className="mb-6 space-y-1 text-sm text-muted-foreground">
@@ -146,6 +150,12 @@ export default async function TeamDetailPage(props: Readonly<TeamDetailPageProps
                         </div>
                     )}
 
+
+                        <p>
+                            <strong>Coach:</strong> {coachName}
+                        </p>
+                    </div>
+
                     <h2 className="mt-8 mb-4 text-xl font-semibold">
                         Team Members
                     </h2>
@@ -161,6 +171,9 @@ export default async function TeamDetailPage(props: Readonly<TeamDetailPageProps
                     )}
 
                     {membersError && <ErrorAlert message={membersError} />}
+                    {membersError && (
+                        <ErrorAlert message={membersError} />
+                    )}
 
                     <h2 className="mt-8 mb-4 text-xl font-semibold">
                         Scientific Projects
@@ -191,6 +204,21 @@ export default async function TeamDetailPage(props: Readonly<TeamDetailPageProps
                             ))}
                         </ul>
                     )}
+                        {!scientificProjectsError && scientificProjects.length > 0 && (
+                            <ul className="space-y-3">
+                                {scientificProjects.map((project, index) => (
+                                    <li key={project.uri ?? project.link("self")?.href ?? index}>
+                                        <ScientificProjectCardLink
+                                            project={project}
+                                            index={index}
+                                            variant="stacked"
+                                        />
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </section>
+
                 </div>
             </div>
         </div>
