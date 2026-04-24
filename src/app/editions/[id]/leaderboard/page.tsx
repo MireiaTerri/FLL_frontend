@@ -1,4 +1,6 @@
 import { LeaderboardService } from "@/api/leaderboardApi";
+import ErrorAlert from "@/app/components/error-alert";
+import EmptyState from "@/app/components/empty-state";
 import { serverAuthProvider } from "@/lib/authProvider";
 import { parseErrorMessage } from "@/types/errors";
 import type { LeaderboardItem } from "@/types/leaderboard";
@@ -28,25 +30,24 @@ export default async function LeaderboardPage(props: Readonly<LeaderboardPagePro
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-zinc-50">
+        <div className="flex min-h-screen items-center justify-center bg-background">
             <div className="w-full max-w-3xl px-4 py-10">
-                <div className="w-full rounded-lg border bg-white p-6 shadow-sm dark:bg-black">
-                    <h1 className="text-2xl font-semibold mb-6">Leaderboard</h1>
+                <div className="w-full rounded-lg border border-border bg-card p-6 shadow-sm">
+                    <h1 className="text-2xl font-semibold mb-6 text-foreground">Leaderboard</h1>
 
-                    {error && (
-                        <div className="rounded border border-red-200 p-4 text-red-600 text-sm">
-                            {error}
-                        </div>
-                    )}
+                    {error && <ErrorAlert message={error} />}
 
                     {!error && items.length === 0 && (
-                        <p className="text-zinc-500 text-sm">No results yet for this edition.</p>
+                        <EmptyState
+                            title="No results yet"
+                            description="No results yet for this edition."
+                        />
                     )}
 
                     {!error && items.length > 0 && (
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="border-b text-left text-zinc-500">
+                                <tr className="border-b border-border text-left text-muted-foreground">
                                     <th scope="col" className="pb-3 pr-4 font-medium">#</th>
                                     <th scope="col" className="pb-3 pr-4 font-medium">Team</th>
                                     <th scope="col" className="pb-3 pr-4 font-medium text-right">Total Score</th>
@@ -57,22 +58,22 @@ export default async function LeaderboardPage(props: Readonly<LeaderboardPagePro
                                 {items.map((item) => {
                                     const isTop3 = item.position <= 3;
                                     return (
-                                        <tr key={item.teamId} className="border-b last:border-0">
-                                            <td className={`py-3 pr-4 text-sm ${isTop3 ? "font-semibold text-zinc-900" : "text-zinc-400"}`}>
+                                        <tr key={item.teamId} className="border-b border-border last:border-0">
+                                            <td className={`py-3 pr-4 text-sm ${isTop3 ? "font-semibold text-foreground" : "text-muted-foreground"}`}>
                                                 {item.position}
                                             </td>
-                                            <td className={`py-3 pr-4 ${isTop3 ? "font-semibold text-zinc-900" : ""}`}>
+                                            <td className={`py-3 pr-4 ${isTop3 ? "font-semibold text-foreground" : ""}`}>
                                                 <Link
-                                                    href={`/teams/${encodeURIComponent(item.teamName)}`}
+                                                    href={`/teams/${encodeURIComponent(item.teamId)}`}
                                                     className="hover:underline"
                                                 >
                                                     {item.teamName}
                                                 </Link>
                                             </td>
-                                            <td className={`py-3 pr-4 text-right ${isTop3 ? "font-semibold text-zinc-900" : ""}`}>
+                                            <td className={`py-3 pr-4 text-right ${isTop3 ? "font-semibold text-foreground" : ""}`}>
                                                 {item.totalScore}
                                             </td>
-                                            <td className={`py-3 text-right ${isTop3 ? "font-semibold text-zinc-900" : ""}`}>
+                                            <td className={`py-3 text-right ${isTop3 ? "font-semibold text-foreground" : ""}`}>
                                                 {item.matchesPlayed}
                                             </td>
                                         </tr>
