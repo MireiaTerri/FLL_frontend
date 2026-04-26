@@ -1,11 +1,14 @@
 import { AwardsService } from "@/api/awardApi";
 import { EditionsService } from "@/api/editionApi";
+import { LeaderboardService } from "@/api/leaderboardApi";
 import { MediaService } from "@/api/mediaApi";
 import ErrorAlert from "@/app/components/error-alert";
 import EmptyState from "@/app/components/empty-state";
+import LeaderboardTable from "@/app/components/leaderboard-table";
 import { MediaItem } from "@/app/components/media-gallery";
 import { MediaSection } from "@/app/components/media-section";
 import { serverAuthProvider } from "@/lib/authProvider";
+import type { LeaderboardItem } from "@/types/leaderboard";
 import { getEncodedResourceId } from "@/lib/halRoute";
 import { Award } from "@/types/award";
 import { Edition } from "@/types/edition";
@@ -112,7 +115,7 @@ function toMediaItem(content: MediaContent): MediaItem {
         uri: content.uri ?? content.link?.("self")?.href,
         id: content.id,
         type: content.type,
-        url: content.url,
+        url: content.url ?? content.id,  // API stores the media URL in `id` when no separate url field
     };
 }
 
@@ -144,10 +147,12 @@ export default async function EditionDetailPage(props: Readonly<EditionDetailPag
     let teams: Team[] = [];
     let awards: Award[] = [];
     let mediaContents: MediaContent[] = [];
+    let leaderboardItems: LeaderboardItem[] = [];
     let error: string | null = null;
     let teamsError: string | null = null;
     let awardsError: string | null = null;
     let mediaError: string | null = null;
+    let classificationError: string | null = null;
 
     try {
         edition = await editionsService.getEditionById(id);
@@ -174,6 +179,14 @@ export default async function EditionDetailPage(props: Readonly<EditionDetailPag
 
         if (edition.uri) {
             ({ awards, mediaContents, awardsError, mediaError } = await fetchByEditionUri(edition.uri, awardsService, mediaService));
+        }
+
+        try {
+            const data = await new LeaderboardService(serverAuthProvider).getEditionLeaderboard(id, 0, 100);
+            leaderboardItems = data.items;
+        } catch (e) {
+            console.error("Failed to fetch leaderboard:", e);
+            classificationError = parseErrorMessage(e);
         }
     }
 
@@ -269,6 +282,21 @@ export default async function EditionDetailPage(props: Readonly<EditionDetailPag
                                         description="Awards for this edition have not been published yet."
                                     />
                                 </div>
+                            )}
+
+                            <h2 className="mt-8 mb-4 text-xl font-semibold text-foreground">Final Classification</h2>
+
+                            {classificationError && <ErrorAlert message={classificationError} />}
+
+                            {!classificationError && leaderboardItems.length === 0 && (
+                                <EmptyState
+                                    title="No results yet"
+                                    description="Classification will appear once match results are recorded."
+                                />
+                            )}
+
+                            {!classificationError && leaderboardItems.length > 0 && (
+                                <LeaderboardTable items={leaderboardItems} />
                             )}
 
                             {mediaError && <ErrorAlert message={mediaError} />}

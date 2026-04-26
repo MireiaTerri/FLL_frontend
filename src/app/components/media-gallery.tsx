@@ -2,9 +2,7 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { ChevronLeft, ChevronRight, Film, FileIcon, X, ExternalLink, PlayCircle } from "lucide-react";
-import Link from "next/link";
 import { useRef, useState } from "react";
-import { getEncodedResourceId } from "@/lib/halRoute";
 
 export interface MediaItem {
     uri?: string;
@@ -26,12 +24,6 @@ function isImage(type?: string): boolean {
 
 function isVideo(type?: string): boolean {
     return (type?.startsWith("video/")) ?? false;
-}
-
-function getMediaHref(item: MediaItem): string | null {
-    const resourceUri = item.uri ?? item.link?.("self")?.href;
-    const id = getEncodedResourceId(resourceUri);
-    return id ? `/media-contents/${id}` : null;
 }
 
 // ─── Shared thumbnail renderers ───────────────────────────────────────────────
@@ -77,31 +69,15 @@ function MediaCard({ item, index, className, onClick }: {
     readonly className: string;
     readonly onClick: () => void;
 }) {
-    const href = getMediaHref(item);
-    const cardClassName = `group relative overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md ${className}`;
-    const content = (
-        <>
-            <MediaThumb item={item} index={index} />
-            <div className="absolute inset-0 bg-black/0 transition-colors duration-200 group-hover:bg-black/15" />
-        </>
-    );
-
-    if (href) {
-        return (
-            <Link href={href} aria-label={`Open media ${index + 1}`} className={cardClassName}>
-                {content}
-            </Link>
-        );
-    }
-
     return (
         <button
             type="button"
             onClick={onClick}
             aria-label={`Open media ${index + 1}`}
-            className={cardClassName}
+            className={`group relative overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md ${className}`}
         >
-            {content}
+            <MediaThumb item={item} index={index} />
+            <div className="absolute inset-0 bg-black/0 transition-colors duration-200 group-hover:bg-black/15" />
         </button>
     );
 }
@@ -149,19 +125,20 @@ function LightboxMedia({ item, index }: { readonly item: MediaItem; readonly ind
 }
 
 function LightboxContent({ item, index }: { readonly item: MediaItem; readonly index: number }) {
-    const href = getMediaHref(item);
     const ytId = getYouTubeId(item.url);
 
     return (
         <div className="flex flex-col items-center gap-5">
             <LightboxMedia item={item} index={index} />
-            {!ytId && href && (
-                <Link
-                    href={href}
+            {!ytId && item.url && (
+                <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
                 >
-                    View details <ExternalLink className="h-4 w-4" />
-                </Link>
+                    Open original <ExternalLink className="h-4 w-4" />
+                </a>
             )}
         </div>
     );
