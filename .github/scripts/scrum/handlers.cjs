@@ -403,7 +403,7 @@ async function handlePullRequestCommentCreated({ github, context, core }) {
 	const comment = context.payload.comment;
 	const issue = context.payload.issue;
 
-	const commenter = comment.user?.login || "";
+	let commenter = comment.user?.login || "";
 	if (commenter.toLowerCase().endsWith("[bot]")) return;
 
 	const bodyTrim = (comment.body || "").trim();
@@ -423,6 +423,10 @@ async function handlePullRequestCommentCreated({ github, context, core }) {
 	// Check if PR has pr-not-ready label
 	const labels = pr.labels.map(l => l.name);
 	if (!labels.includes("pr-not-ready")) return;
+
+	if (commenter.toLowerCase() === instructorLogin().toLowerCase()) {
+		commenter = pr.user.login;
+	}
 
 	// Get closing issues
 	const q = `
@@ -451,9 +455,8 @@ async function handlePullRequestCommentCreated({ github, context, core }) {
 		const assignees = (iss.assignees.nodes || []).map(a => (a.login || "").toLowerCase());
 		return !assignees.includes(commenterLower);
 	});
-	const commenterIsInstructor = commenterLower === instructorLogin().toLowerCase();
 
-	if (!commenterIsInstructor && notAssignedTo.length > 0) {
+	if (notAssignedTo.length > 0) {
 		await addComment(github, context, [
 			`Hi @${commenter}, you cannot mark this PR as ready because you are not assigned to its linked issues.`,
 			"",
